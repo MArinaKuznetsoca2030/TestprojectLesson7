@@ -6,6 +6,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class WeatherResponse {
 
@@ -50,7 +51,6 @@ public class WeatherResponse {
                  .readTree(responseJson)
                  .at("/DailyForecasts/0/Temperature/Minimum/Value");
 
-
          JsonNode jsonTemperatureMax = objectMapper
                  .readTree(responseJson)
                  .at("/DailyForecasts/0/Temperature/Maximum/Value");
@@ -65,6 +65,10 @@ public class WeatherResponse {
          String tmpTemperatureMin = jsonTemperatureMin.asText();
          String tmpTemperatureMax = jsonTemperatureMax.asText();
 
+
+         float tmpTemperatureMinC =  (( Float.parseFloat(tmpTemperatureMin) - 32) *5/9);
+         float tmpTemperatureMaxC =  ((Float.parseFloat(tmpTemperatureMax) - 32) *5/9);
+
          System.out.println("Город: " +"Moscow");
          System.out.println("Дата: " + tmpDate);
          System.out.println("Описание погоды: " + tmpDescriptionOfTheWeather);
@@ -73,7 +77,17 @@ public class WeatherResponse {
          System.out.println("Температура min: " + (( Float.parseFloat(tmpTemperatureMin) - 32) *5/9)+ "C");
          System.out.println("Температура max: " +  (( Float.parseFloat(tmpTemperatureMax) - 32) *5/9)+ "C");
 
+         DBHandler dbHandler;
+         try {
+             dbHandler = new DBHandler();
 
+             dbHandler.addSWeather("Moscow", tmpDate, tmpDescriptionOfTheWeather, tmpTemperatureMinC, tmpTemperatureMaxC);
+             dbHandler.selectAllTableWeatherCity();
+
+
+         } catch (SQLException e) {
+             e.printStackTrace();
+         }
          return responseJson;
 
 
